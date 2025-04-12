@@ -1,0 +1,98 @@
+<mat-toolbar color="primary" class="mb-20">
+  <span>Dynamic Form Builder</span>
+</mat-toolbar>
+
+<div class="flex justify-end pr-6 mb-4">
+  <button mat-raised-button color="primary" (click)="openDialog()">
+    Add Field
+  </button>
+</div>
+
+<form *ngIf="selectedFields.length > 0" [formGroup]="form" (ngSubmit)="submitForm()">
+  <div *ngFor="let field of selectedFields">
+    <div class="flex justify-center">
+      <mat-card class="card-blue w-3/4 h-auto p-4 mb-4">
+        <div class="items-center mb-2">
+          <span class="text-blue text-lg font-semibold">{{ fieldConfigs[field].label }}</span>
+          
+          <!-- Edit button -->
+          <div class="flex justify-end">
+            <button mat-icon-button (click)="editField(field)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            
+            <!-- Delete button -->
+            <button mat-icon-button color="warn" (click)="deleteField(field)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Edit Mode -->
+        <div *ngIf="editingField === field" class="mb-4">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Edit Label</mat-label>
+            <input matInput [formControlName]="field + '-label'">
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Edit Placeholder</mat-label>
+            <input matInput [formControlName]="field + '-placeholder'">
+          </mat-form-field>
+
+          <button mat-stroked-button  (click)="saveEdit()">Save</button>
+          <button mat-stroked-button (click)="cancelEdit()">Cancel</button>
+        </div>
+
+        <!-- Display Mode -->
+        <div *ngIf="editingField !== field">
+          <!-- TEXT FIELD -->
+          <mat-form-field *ngIf="fieldConfigs[field].type === 'text'" appearance="outline" class="w-full">
+            <mat-label>{{ fieldConfigs[field].label }}</mat-label>
+            <input matInput [placeholder]="fieldConfigs[field].placeholder!" [formControlName]="field">
+            <mat-error *ngIf="form.get(field)?.hasError('required')">
+              This field is required.
+            </mat-error>
+            <mat-error *ngIf="form.get(field)?.hasError('invalidEmail')">
+              Please enter a valid email address.
+            </mat-error>
+            <mat-error *ngIf="form.get(field)?.hasError('invalidMobile')">
+              Please enter a valid 10 digit mobile number.
+            </mat-error>
+          </mat-form-field>
+          
+          <!-- DROPDOWN -->
+          <mat-form-field *ngIf="fieldConfigs[field].type === 'dropdown'" appearance="outline" class="w-full">
+            <mat-label>{{ fieldConfigs[field].label }}</mat-label>
+            <mat-select [formControlName]="field">
+              <mat-option *ngFor="let option of fieldConfigs[field].options" [value]="option">{{ option }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get(field)?.hasError('required')">
+              This field is required.
+            </mat-error>
+          </mat-form-field>
+
+          <!-- CHECKBOX -->
+          <mat-checkbox *ngIf="fieldConfigs[field].type === 'checkbox'" [formControlName]="field">
+            {{ fieldConfigs[field].label }}
+          </mat-checkbox>
+          <mat-error class="mt-4" *ngIf="form.get(field)?.hasError('required') && fieldConfigs[field].type === 'checkbox'">
+            Please Check the checkbox
+      </mat-error>
+        </div>
+        
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="flex justify-center pr-6 mt-4">
+    <button mat-raised-button color="primary" type="submit">Save</button>
+  </div>
+  <div class="flex justify-center pr-6 mt-4">
+    <button mat-raised-button color="error" (click)="clearForm()">Clear</button>
+  </div>
+</form>
+  
+<div *ngIf="selectedFields.length === 0" class="flex justify-center items-center h-64 text-center">
+  <span class="text-xl text-gray-700">Click on Add Field to start creating the form</span>
+</div>
